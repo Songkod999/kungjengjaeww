@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>คลังเจ๋งแจ๋ว</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#eef1f8;color:#171a2b}
+.app{max-width:1100px;margin:auto;min-height:100vh}.top{background:linear-gradient(135deg,#5b5ce2,#8b5cf6);color:#fff;padding:18px 16px 24px;border-radius:0 0 26px 26px}.topbar{display:flex;justify-content:space-between;align-items:center}.brand{font-size:23px;font-weight:900}.top small{opacity:.8}.icon{border:0;background:#ffffff22;color:#fff;border-radius:12px;padding:9px;cursor:pointer}
+main{padding:14px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:-25px}.stat{background:#fff;border-radius:16px;padding:13px;box-shadow:0 8px 24px #29305b14}.stat small{color:#7b8194}.stat b{display:block;font-size:19px;margin-top:4px}.green{color:#0c9b63}.red{color:#dc3545}
+nav{display:flex;gap:7px;overflow:auto;margin:15px 0}nav button{white-space:nowrap;border:0;padding:10px 14px;border-radius:12px;background:#fff;color:#666b7d;font-weight:800}nav button.on{background:#171a2b;color:#fff}
+.page{display:none}.page.on{display:block}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 22px #29305b10}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}label{font-size:12px;font-weight:800;color:#666b7d}input,select,textarea{width:100%;padding:11px;margin-top:5px;border:1px solid #e0e3ec;border-radius:11px;font:inherit;background:#fff}textarea{min-height:80px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:800;cursor:pointer}.primary{background:#5b5ce2;color:#fff}.muted{background:#eef0f6}.danger{background:#fee2e2;color:#b4232d}.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.gameRow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.badge{padding:5px 9px;border-radius:999px;background:#eef0ff;color:#5558c9;font-size:11px;font-weight:800}.bar{height:8px;background:#edf0f5;border-radius:20px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#5b5ce2,#8b5cf6)}.login{position:fixed;inset:0;background:linear-gradient(135deg,#4f46e5,#8b5cf6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}.loginBox{background:#fff;width:min(390px,100%);border-radius:25px;padding:26px;box-shadow:0 25px 70px #171a2b55}.loginBox h1{margin:0 0 5px}.loginBox p{color:#73798b}.hide{display:none!important}.slip{width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer}.table{overflow:auto}.table table{width:100%;border-collapse:collapse;min-width:760px}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid #edf0f5;font-size:13px}.table th{color:#747a8d;background:#fafbfe}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#171a2b;color:#fff;padding:10px 16px;border-radius:12px;display:none;z-index:30}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+<div class="loginBox">
+<h1>🎮 คลังเจ๋งแจ๋ว</h1>
+<p>ระบบจัดการไอดีเกม • ลงทุน • ขาย • กำไร</p>
+<label>ชื่อผู้ใช้<input id="lu" value="admin"></label><br>
+<label>รหัสผ่าน<input id="lp" type="password" placeholder="รหัสผ่าน"></label>
+<button class="btn primary" style="width:100%;margin-top:14px" onclick="login()">เข้าสู่ระบบ</button>
+<p style="font-size:12px">รหัสเริ่มต้น: <b>admin / 1234</b><br>หลังเข้าใช้งานสามารถเปลี่ยนรหัสผ่านได้ที่เมนู ⚙️</p>
+</div>
+</div>
+
+<div class="app hide" id="app">
+<header class="top">
+<div class="topbar">
+<div><div class="brand">🎮 คลังเจ๋งแจ๋ว</div><small>Game ID Investment Manager</small></div>
+<button class="icon" onclick="logout()">ออกจากระบบ</button>
+</div>
+</header>
+
+<main>
+<div class="stats">
+<div class="stat"><small>ทุนทั้งหมด</small><b id="cost">฿0</b></div>
+<div class="stat"><small>ยอดขาย</small><b id="sale">฿0</b></div>
+<div class="stat"><small>กำไร</small><b class="green" id="profit">฿0</b></div>
+<div class="stat"><small>จำนวนไอดี</small><b id="count">0</b></div>
+</div>
+
+<nav>
+<button class="on" onclick="page('home',this)">🏠 ภาพรวม</button>
+<button onclick="page('ids',this)">🎮 ไอดี</button>
+<button onclick="page('add',this)">➕ เพิ่ม</button>
+<button onclick="page('games',this)">📊 กำไรตามเกม</button>
+<button onclick="page('sales',this)">🧾 ขาย</button>
+<button onclick="page('settings',this)">⚙️ ตั้งค่า</button>
+</nav>
+
+<section id="home" class="page on">
+<div class="card">
+<div class="row"><h2>ภาพรวม</h2><button class="btn primary" onclick="exportExcel()">📥 ส่งออก Excel</button></div>
+<div id="recent"></div>
+</div>
+</section>
+
+<section id="ids" class="page">
+<div class="card">
+<div class="row"><h2>🎮 ไอดีทั้งหมด</h2><input style="max-width:250px" id="search" placeholder="🔎 ค้นหา..." oninput="render()"></div>
+<div class="table" id="idTable"></div>
+</div>
+</section>
+
+<section id="add" class="page">
+<div class="card">
+<h2 id="formTitle">➕ เพิ่มไอดี / การลงทุน</h2>
+<div class="grid">
+<label>เกม<input id="game" placeholder="เช่น FC Mobile"></label>
+<label>UID / ID<input id="uid"></label>
+<label>ชื่อบัญชี<input id="account"></label>
+<label>เงินลงทุน<input id="c" type="number" min="0"></label>
+<label>ราคาขาย<input id="s" type="number" min="0"></label>
+<label>สถานะ<select id="st"><option>ถืออยู่</option><option>ลงขาย</option><option>ขายแล้ว</option></select></label>
+<label>วันที่ลงทุน<input id="bd" type="date"></label>
+<label>วันที่ขาย<input id="sd" type="date"></label>
+<label>สลิปขาย<input id="file" type="file" accept="image/*"></label>
+</div>
+<div class="row" style="margin-top:14px">
+<div><button class="btn primary" id="saveBtn" onclick="saveItem()">💾 บันทึก</button>
+<button class="btn muted" onclick="clearForm()">ล้าง</button></div>
+<span id="editHint"></span>
+</div>
+</div>
+</section>
+
+<section id="games" class="page">
+<div class="card"><h2>📊 กำไรแยกตามเกม</h2><div id="gameProfit"></div></div>
+</section>
+
+<section id="sales" class="page">
+<div class="card"><h2>🧾 รายการขาย</h2><div class="table" id="salesTable"></div></div>
+</section>
+
+<section id="settings" class="page">
+<div class="card">
+<h2>⚙️ ตั้งค่าบัญชี</h2>
+<p>ชื่อผู้ใช้ปัจจุบัน: <b id="currentUser">admin</b></p>
+<div class="grid">
+<label>รหัสผ่านเดิม<input id="oldpass" type="password"></label>
+<label>รหัสผ่านใหม่<input id="newpass" type="password"></label>
+<label>ยืนยันรหัสผ่านใหม่<input id="confpass" type="password"></label>
+</div>
+<button class="btn primary" style="margin-top:14px" onclick="changePassword()">🔐 เปลี่ยนรหัสผ่าน</button>
+<hr style="border:0;border-top:1px solid #eee;margin:22px 0">
+<h3>💾 จัดการข้อมูล</h3>
+<button class="btn primary" onclick="exportExcel()">📥 ส่งออก Excel</button>
+<button class="btn danger" onclick="clearAll()">🗑️ ลบข้อมูลทั้งหมด</button>
+</div>
+</section>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DB='kungjengjaew_data_v2',USER='kungjengjaew_user',PASS='kungjengjaew_pass';
+let d=JSON.parse(localStorage.getItem(DB)||'[]'), editId=null;
+const $=id=>document.getElementById(id);
+const money=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2});
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1800)}
+function login(){
+ let u=$('lu').value.trim(),p=$('lp').value;
+ let old=localStorage.getItem(PASS);
+ if(!old){localStorage.setItem(USER,'admin');localStorage.setItem(PASS,'1234');old='1234'}
+ if(u!==(localStorage.getItem(USER)||'admin')||p!==old)return toast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+ sessionStorage.ok='1';$('login').classList.add('hide');$('app').classList.remove('hide');render();
+}
+function logout(){sessionStorage.clear();location.reload()}
+function changePassword(){
+ let old=$('oldpass').value,np=$('newpass').value,cf=$('confpass').value;
+ if(old!==localStorage.getItem(PASS))return toast('รหัสผ่านเดิมไม่ถูกต้อง');
+ if(np.length<4)return toast('รหัสผ่านใหม่อย่างน้อย 4 ตัว');
+ if(np!==cf)return toast('ยืนยันรหัสผ่านไม่ตรงกัน');
+ localStorage.setItem(PASS,np);$('oldpass').value=$('newpass').value=$('confpass').value='';
+ toast('เปลี่ยนรหัสผ่านสำเร็จ');
+}
+function page(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');render()}
+function persist(){localStorage.setItem(DB,JSON.stringify(d));render();toast('บันทึกข้อมูลแล้ว')}
+function clearForm(){editId=null;['game','uid','account','c','s','bd','sd','file'].forEach(x=>$(x).value='');$('st').value='ถืออยู่';$('formTitle').textContent='➕ เพิ่มไอดี / การลงทุน';$('saveBtn').textContent='💾 บันทึก';$('editHint').textContent=''}
+function saveItem(){
+ let f=$('file').files[0];
+ const finish=slip=>{
+  let item={id:editId||Date.now(),game:$('game').value.trim()||'ไม่ระบุ',uid:$('uid').value,account:$('account').value,c:+$('c').value||0,s:+$('s').value||0,st:$('st').value,bd:$('bd').value,sd:$('sd').value,slip:slip};
+  if(editId){let i=d.findIndex(x=>x.id===editId);if(i>=0){if(!slip)item.slip=d[i].slip;d[i]=item}}
+  else d.unshift(item);
+  persist();clearForm();
+ };
+ if(f){let r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(f)}else finish('');
+}
+function editItem(id){
+ let x=d.find(v=>v.id===id);if(!x)return;
+ editId=id;$('game').value=x.game;$('uid').value=x.uid;$('account').value=x.account||'';$('c').value=x.c;$('s').value=x.s;$('st').value=x.st;$('bd').value=x.bd||'';$('sd').value=x.sd||'';
+ $('formTitle').textContent='✏️ แก้ไขไอดี';$('saveBtn').textContent='💾 บันทึกการแก้ไข';$('editHint').textContent='กำลังแก้ไข: '+x.game;
+ document.querySelectorAll('.page').forEach(v=>v.classList.remove('on'));$('add').classList.add('on');document.querySelectorAll('nav button').forEach(v=>v.classList.remove('on'));document.querySelectorAll('nav button')[2].classList.add('on');window.scrollTo(0,0)
+}
+function removeItem(id){if(confirm('ต้องการลบรายการนี้หรือไม่?')){d=d.filter(x=>x.id!==id);persist()}}
+function clearAll(){if(confirm('ลบข้อมูลไอดีทั้งหมดจริงหรือไม่?')){d=[];persist()}}
+function render(){
+ let tc=d.reduce((a,x)=>a+x.c,0),ts=d.reduce((a,x)=>a+x.s,0);
+ $('cost').textContent=money(tc);$('sale').textContent=money(ts);$('profit').textContent=money(ts-tc);$('count').textContent=d.length;$('currentUser').textContent=localStorage.getItem(USER)||'admin';
+ let q=($('search')?.value||'').toLowerCase(),a=d.filter(x=>(x.game+' '+x.uid+' '+x.st+' '+(x.account||'')).toLowerCase().includes(q));
+ $('idTable').innerHTML=a.length?'<table><tr><th>เกม / UID</th><th>ทุน</th><th>ขาย</th><th>กำไร</th><th>สถานะ</th><th>สลิป</th><th>จัดการ</th></tr>'+a.map(x=>`<tr><td><b>${esc(x.game)}</b><br>${esc(x.uid)}</td><td>${money(x.c)}</td><td>${x.s?money(x.s):'-'}</td><td class="${x.s-x.c>=0?'green':'red'}">${x.s?money(x.s-x.c):'-'}</td><td>${esc(x.st)}</td><td>${x.slip?`<img class=slip src="${x.slip}" onclick="window.open(this.src)">`:'-'}</td><td><button class="btn primary" onclick="editItem(${x.id})">แก้ไข</button> <button class="btn danger" onclick="removeItem(${x.id})">ลบ</button></td></tr>`).join('')+'</table>':'<p>ยังไม่มีข้อมูล</p>';
+ let g={};d.forEach(x=>{g[x.game]??={c:0,s:0,n:0};g[x.game].c+=x.c;g[x.game].s+=x.s;g[x.game].n++});
+ let arr=Object.entries(g).sort((a,b)=>(b[1].s-b[1].c)-(a[1].s-a[1].c)),mx=Math.max(1,...arr.map(x=>Math.abs(x[1].s-x[1].c)));
+ $('gameProfit').innerHTML=arr.length?arr.map(([name,x])=>{let p=x.s-x.c;return `<div class=gameRow><div style="min-width:130px"><b>${esc(name)}</b><br><small>${x.n} ไอดี</small></div><div style="flex:1"><div class=bar><i style="width:${Math.min(100,Math.abs(p)/mx*100)}%"></i></div><small>ทุน ${money(x.c)} · ขาย ${money(x.s)}</small></div><b class="${p>=0?'green':'red'}">${money(p)}</b></div>`}).join(''):'<p>ยังไม่มีข้อมูล</p>';
+ let sold=d.filter(x=>x.st==='ขายแล้ว');
+ $('salesTable').innerHTML=sold.length?'<table><tr><th>วันที่</th><th>เกม</th><th>ทุน</th><th>ขาย</th><th>กำไร</th><th>สลิป</th></tr>'+sold.map(x=>`<tr><td>${x.sd||'-'}</td><td><b>${esc(x.game)}</b><br>${esc(x.uid)}</td><td>${money(x.c)}</td><td>${money(x.s)}</td><td class="${x.s-x.c>=0?'green':'red'}">${money(x.s-x.c)}</td><td>${x.slip?`<img class=slip src="${x.slip}" onclick="window.open(this.src)">`:'-'}</td></tr>`).join('')+'</table>':'<p>ยังไม่มีรายการขาย</p>';
+ $('recent').innerHTML=d.slice(0,5).map(x=>`<div class=gameRow><div><b>${esc(x.game)}</b><br><small>${esc(x.uid)}</small></div><span class=badge>${esc(x.st)}</span></div>`).join('')||'<p>เริ่มเพิ่มไอดีเกมรายการแรกได้เลย</p>';
+}
+function exportExcel(){
+ let rows=[['เกม','UID','ชื่อบัญชี','ทุน','ราคาขาย','กำไร','สถานะ','วันที่ลงทุน','วันที่ขาย']];
+ d.forEach(x=>rows.push([x.game,x.uid,x.account,x.c,x.s,x.s-x.c,x.st,x.bd,x.sd]));
+ let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\r\n');
+ let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='คลังเจ๋งแจ๋ว_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('ส่งออกไฟล์สำหรับ Excel แล้ว')
+}
+if(sessionStorage.ok){$('login').classList.add('hide');$('app').classList.remove('hide')}
+render();
+</script>
+</body>
+</html>
